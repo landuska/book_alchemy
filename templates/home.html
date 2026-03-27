@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        .book {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .book img {
+        width: 100px;
+        height: auto;
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>My Books</h1>
+
+    {% for book in books %}
+    <div class="book">
+      <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+      <div>
+        <p><strong>{{ book.title }}</strong></p>
+        <p>Written by <strong>{{ book.name }}</strong></p>
+      </div>
+    </div>
+    {% endfor %}
+
+  </body>
+</html>
