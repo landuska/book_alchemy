@@ -20,6 +20,12 @@
   <body>
     <h1>My Books</h1>
 
+    <form method="GET" action="/">
+      <label for="search">Search by:</label>
+        <input type="text" id="search" name="search"><br><br>
+        <input type="submit" value="Search">
+    </form><br><br>
+
     {% for book in books %}
     <div class="book">
       <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">

@@ -22,14 +22,17 @@ def get_book_cover(isbn):
     if "items" in book_info:
         volume_info = book_info["items"][0]["volumeInfo"]
         if "imageLinks" in volume_info:
-            return volume_info["imageLinks"].get("Thumbnail")
+            return volume_info["imageLinks"].get("thumbnail")
 
 @app.route('/', methods=['GET'])
 def home():
-    books_with_authors = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name)\
-                         .join(Author)\
-                         .all()
+    keyword = request.args.get('search')
+    query = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name).join(Author)
 
+    if keyword:
+        query = query.filter(Book.title.like(f"%{keyword}%"))
+
+    books_with_authors = query.all()
     return render_template('home.html', books=books_with_authors)
 
 
@@ -87,21 +90,17 @@ def add_book():
 @app.route('/sort', methods=['GET'])
 def sort():
     sort_by = request.args.get('sort')
+    query = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name).join(Author)
 
     if sort_by == 'publication_year':
-        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name) \
-            .join(Author) \
-            .order_by(Book.publication_year).all()
+        books = query.order_by(Book.publication_year).all()
     elif sort_by == 'author':
-        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name) \
-            .join(Author) \
-            .order_by(Author.name).all()
+        books = query.order_by(Author.name).all()
     else:
-        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name)\
-             .join(Author)\
-             .all()
+        books = query.all()
 
     return render_template('sort.html', books=books)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
