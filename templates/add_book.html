@@ -16,7 +16,7 @@
           <input type="number" id="publication_year" name="publication_year"><br><br>
           <label for="author">Select author:</label>
           <select id="author" name="author_id">
-          <option value=""> </option>
+          <option value="">-- Select --</option>
           {% for author in authors %}
               <option value="{{ author.id }}"> {{author.name}} </option>
           {% endfor %}

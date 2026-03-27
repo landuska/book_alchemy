@@ -84,7 +84,24 @@ def add_book():
     elif request.method == 'GET':
         return render_template('add_book.html', authors=authors)
 
+@app.route('/sort', methods=['GET'])
+def sort():
+    sort_by = request.args.get('sort')
 
+    if sort_by == 'publication_year':
+        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name) \
+            .join(Author) \
+            .order_by(Book.publication_year).all()
+    elif sort_by == 'author':
+        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name) \
+            .join(Author) \
+            .order_by(Author.name).all()
+    else:
+        books = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name)\
+             .join(Author)\
+             .all()
+
+    return render_template('sort.html', books=books)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
