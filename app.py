@@ -27,7 +27,7 @@ def get_book_cover(isbn):
 @app.route('/', methods=['GET'])
 def home():
     keyword = request.args.get('search')
-    query = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name).join(Author)
+    query = db.session.query(Book, Author).join(Author, Book.author_id == Author.id)
 
     if keyword:
         query = query.filter(Book.title.like(f"%{keyword}%"))
@@ -90,7 +90,7 @@ def add_book():
 @app.route('/sort', methods=['GET'])
 def sort():
     sort_by = request.args.get('sort')
-    query = db.session.query(Book.title, Book.isbn, Book.cover_url, Author.name).join(Author)
+    query = db.session.query(Book, Author).join(Author, Book.author_id == Author.id)
 
     if sort_by == 'publication_year':
         books = query.order_by(Book.publication_year).all()
@@ -100,6 +100,26 @@ def sort():
         books = query.all()
 
     return render_template('sort.html', books=books)
+
+@app.route("/book/<int:book_id>/delete", methods=['POST'])
+def delete_book(book_id):
+    book = db.session.get(Book, book_id)
+
+    if book:
+        author_id = book.author_id
+        book_title = book.title
+        db.session.delete(book)
+
+        other_books_exist = db.session.query(Book).filter(Book.author_id == author_id).first()
+
+        if not other_books_exist:
+            author = db.session.get(Author, author_id)
+            if author:
+                db.session.delete(author)
+
+    db.session.commit()
+
+    return redirect(url_for('home'))
 
 
 if __name__ == "__main__":

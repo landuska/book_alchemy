@@ -20,15 +20,15 @@
   <body>
     <h1>My Books</h1>
     <form method="GET" action="/sort">
-      <label>Sort by:</label>
-      <select name="sort">
+      <label for="sort">Sort by:</label>
+      <select name="sort" id="sort">
         <option value="">-- Select --</option>
         <option value="publication_year">Publication Year</option>
         <option value="author">Author</option>
       </select>
       <input type="submit" value="Submit">
     </form><br><br>
-    {% for book in books %}
+    {% for book, author in books %}
     <div class="book">
       <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
       <div>

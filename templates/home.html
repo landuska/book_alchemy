@@ -26,12 +26,15 @@
         <input type="submit" value="Search">
     </form><br><br>
 
-    {% for book in books %}
+    {% for book, author in books %}
     <div class="book">
       <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
       <div>
         <p><strong>{{ book.title }}</strong></p>
         <p>Written by <strong>{{ book.name }}</strong></p>
+        <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
+            <input type="submit" id="delete" value="Delete">
+        </form><br><br>
       </div>
     </div>
     {% endfor %}
