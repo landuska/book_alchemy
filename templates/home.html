@@ -19,25 +19,29 @@
   </head>
   <body>
     <h1>My Books</h1>
-
     <form method="GET" action="/">
-      <label for="search">Search by:</label>
+      <label for="search">Search by title:</label>
         <input type="text" id="search" name="search"><br><br>
         <input type="submit" value="Search">
-    </form><br><br>
-
-    {% for book, author in books %}
+    </form><br>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <p style="color: green;">{{ msg }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% for book, author in books %}<br>
     <div class="book">
       <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
       <div>
         <p><strong>{{ book.title }}</strong></p>
-        <p>Written by <strong>{{ book.name }}</strong></p>
+        <p>Written by <strong>{{ author.name }}</strong></p>
         <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
-            <input type="submit" id="delete" value="Delete">
+            <input type="submit" value="Delete">
         </form><br><br>
       </div>
     </div>
     {% endfor %}
-
   </body>
 </html>

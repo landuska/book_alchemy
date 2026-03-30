@@ -6,7 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
   </head>
   <body>
-
+      {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for msg in messages %}
+              <p style="color: green;">{{ msg }}</p>
+            {% endfor %}
+          {% endif %}
+      {% endwith %}<br>
       <form action="/add_book" method="POST">
           <label for="title">Book title:</label>
           <input type="text" id="title" name="title" required><br><br>
@@ -21,8 +27,7 @@
               <option value="{{ author.id }}"> {{author.name}} </option>
           {% endfor %}
           </select>
-          <input type="submit" value="Add Book">
+          <input type="submit" value="Add book">
       </form>
-
   </body>
 </html>
