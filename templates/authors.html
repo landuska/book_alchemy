@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>All Authors</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .author-block {
+        margin-bottom: 30px;
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+      }
+      .author-name {
+        margin-bottom: 5px;
+        color: #333;
+      }
+      .books-list {
+        margin-left: 20px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>All Authors</h1>
+    {% for item in authors %}
+    <div class="author-block">
+        <h3 class="author-name"><strong>{{ item.author.name }}</strong></h3>
+        <ul class="books-list">
+          {% for book in item.books %}
+            <li>
+              {{ book }}
+            </li>
+          {% else %}
+            <li>No books found for this author.</li>
+          {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+  </body>
+</html>

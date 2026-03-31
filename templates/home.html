@@ -24,6 +24,9 @@
         <input type="text" id="search" name="search"><br><br>
         <input type="submit" value="Search">
     </form><br>
+    <form method="GET" action="/authors">
+        <input type="submit" value="Show all authors">
+    </form><br>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for msg in messages %}
@@ -33,14 +36,16 @@
     {% endwith %}
     {% for book, author in books %}<br>
     <div class="book">
-      <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
-      <div>
-        <p><strong>{{ book.title }}</strong></p>
-        <p>Written by <strong>{{ author.name }}</strong></p>
-        <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
-            <input type="submit" value="Delete">
-        </form><br><br>
-      </div>
+        <a href="{{ url_for('get_book_info', book_id=book.id) }}">
+            <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+        </a>
+          <div>
+            <p><strong>{{ book.title }}</strong></p>
+            <p>Written by <strong>{{ author.name }}</strong></p>
+            <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
+                <input type="submit" value="Delete">
+            </form><br><br>
+          </div>
     </div>
     {% endfor %}
   </body>

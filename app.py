@@ -10,7 +10,7 @@ project_root = os.path.dirname(current_file_path)
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(project_root, 'data/library.sqlite')}"
 db.init_app(app)
-app.secret_key = 'key'
+app.secret_key = 'flashkey'
 
 with app.app_context():
     db.create_all()
@@ -18,6 +18,14 @@ with app.app_context():
 
 @app.route('/', methods=['GET'])
 def home():
+    """
+    Displays the homepage with a list of all books and their authors.
+
+    Supports searching for books by title via the 'search' query parameter.
+
+    Returns:
+        Rendered HTML template 'home.html' with a list of (Book, Author) tuples.
+    """
     keyword = request.args.get('search')
     query = db.session.query(Book, Author).join(Author, Book.author_id == Author.id)
 
@@ -30,6 +38,17 @@ def home():
 
 @app.route('/add_author', methods=['GET', 'POST'])
 def add_author():
+    """
+    Handles displaying the form and adding a new author to the database.
+
+    GET: Displays a page with an empty form.
+    POST: Accepts form data (name, birthdate, date of death),
+          validates them, and creates a new Author record.
+
+    Returns:
+        GET: Rendered template 'add_author.html'.
+        POST: Redirect back to '/add_author' with a flash message.
+    """
     if request.method == 'POST':
         input_name = request.form.get('name')
         input_birth_date_str = request.form.get('birthdate','').strip()
@@ -39,7 +58,7 @@ def add_author():
             birth_date = datetime.strptime(input_birth_date_str, '%Y-%m-%d').date() if input_birth_date_str else None
             date_of_death = datetime.strptime(input_date_of_death_str, '%Y-%m-%d').date() if input_date_of_death_str else None
         except ValueError:
-            flash("Invalid date format")
+            flash("error: Invalid date format")
             return redirect(url_for("add_author"))
 
         name_does_exist = db.session.query(Author).filter_by(name=input_name).first()
@@ -69,17 +88,34 @@ def add_author():
 
 @app.route('/add_book', methods=['GET', 'POST'])
 def add_book():
+    """
+    Handles displaying the form and adding a new book to the database.
+
+    GET: Displays a page with the book creation form and author list.
+    POST: Accepts form data (title, ISBN, publication year, author),
+          fetches the book cover via Google Books API, and saves the book.
+
+    Returns:
+        GET: Rendered template 'add_book.html' with Author objects for the dropdown.
+        POST: Redirect back to '/add_book' with a flash message.
+    """
     authors = db.session.query(Author).all()
 
     if request.method == 'POST':
         input_title = request.form.get('title')
         input_isbn = request.form.get('isbn')
         input_publication_year = int(request.form.get('publication_year')) if request.form.get('publication_year') else None
-        input_author_id = int(request.form.get('author_id'))
+        input_author_id_str = request.form.get('author_id')
 
         book_does_exist = db.session.query(Book).filter_by(title=input_title).first()
         if book_does_exist:
             flash(f"Book {input_title} already exists in DB")
+            return redirect(url_for("add_book"))
+
+        try:
+            input_author_id = int(input_author_id_str)
+        except ValueError:
+            flash("error: Please select an author")
             return redirect(url_for("add_book"))
 
         try:
@@ -107,6 +143,17 @@ def add_book():
 
 @app.route('/sort', methods=['GET'])
 def sort():
+    """
+    Displays a sorted list of books on a separate page.
+
+    Accepts the 'sort' query parameter:
+    - 'publication_year': Sorts by publication year (ascending).
+    - 'author': Sorts by author's name (alphabetically).
+    - Any other value (or none): No specific sorting applied.
+
+    Returns:
+        Rendered HTML template 'sort.html' with the sorted data.
+    """
     sort_by = request.args.get('sort')
     query = db.session.query(Book, Author).join(Author, Book.author_id == Author.id)
 
@@ -121,6 +168,18 @@ def sort():
 
 @app.route("/book/<int:book_id>/delete", methods=['POST'])
 def delete_book(book_id):
+    """
+    Deletes a book from the database by its ID.
+
+    If the author has no other books left in the database after the deletion,
+    that author is also automatically removed.
+
+    Args:
+        book_id (int): The unique identifier of the book to be deleted.
+
+    Returns:
+        Redirect to the homepage (home).
+    """
     book = db.session.get(Book, book_id)
 
     if book:
@@ -140,12 +199,35 @@ def delete_book(book_id):
 
     return redirect(url_for('home'))
 
+@app.route("/book/<int:book_id>", methods=['GET'])
+def get_book_info(book_id):
+    book = db.session.get(Book, book_id)
+    if book:
+        return render_template("book_info.html", book=book, author=book.author_id)
+
+@app.route("/authors", methods=['GET'])
+def show_authors():
+    all_data = db.session.query(Book, Author).join(Author, Book.author_id == Author.id).all()
+    authors_dict = {}
+
+    for book, author in all_data:
+        if author.id not in authors_dict:
+            authors_dict[author.id] = {
+                "author": author,
+                "books": []
+            }
+        authors_dict[author.id]["books"].append(book.title)
+        authors_books = list(authors_dict.values())
+    return render_template("authors.html", authors=authors_books)
+
 @app.errorhandler(404)
 def page_not_found(error):
+    """Custom error handler for 404 (Page Not Found) errors."""
     return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def server_error(error):
+    """Custom error handler for 500 (Internal Server Error) errors."""
     return render_template("500.html"), 500
 
 

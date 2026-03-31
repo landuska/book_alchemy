@@ -6,6 +6,16 @@ from sqlalchemy.orm import Mapped, mapped_column, validates
 db = SQLAlchemy()
 
 class Author(db.Model):
+    """
+    Represents an author in the database.
+
+    Attributes:
+        id (int): Primary key, auto-incremented.
+        name (str): The unique name of the author. Cannot be empty.
+        birth_date (date): The author's date of birth. Cannot be in the future.
+        date_of_death (date, optional): The author's date of death. Cannot be
+          in the future.
+    """
     __tablename__ = 'authors'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, unique=True)
@@ -14,12 +24,14 @@ class Author(db.Model):
 
     @validates('name')
     def validate_name(self, key, value):
+        """Validates that the author's name is not empty."""
         if not value:
             raise ValueError("Name cannot be empty")
         return value.strip()
 
     @validates('birth_date', 'date_of_death')
     def validate_dates(self, key, value):
+        """Validates that birth and death dates are not set in the future."""
         if value and value > date.today():
             raise ValueError("Birthdate or deathdate cannot be in the future")
         return value
@@ -35,6 +47,18 @@ class Author(db.Model):
 
 
 class Book(db.Model):
+    """
+    Represents a book in the database.
+
+    Attributes:
+        id (int): Primary key, auto-incremented.
+        isbn (str): The ISBN of the book. Must have at least 10 digits.
+        title (str): The unique title of the book. Cannot be empty.
+        publication_year (int): The year the book was published. Cannot be in
+          the future.
+        author_id (int): Foreign key referencing the author of the book.
+        cover_url (str, optional): URL to the book's cover image.
+    """
     __tablename__ = 'books'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     isbn: Mapped[str] = mapped_column(String)
@@ -45,19 +69,27 @@ class Book(db.Model):
 
     @validates('title')
     def validate_title(self, key, value):
+        """Validates that the book's title is not empty."""
         if not value:
             raise ValueError("Title of book cannot be empty")
         return value.strip()
 
     @validates('isbn')
     def validate_isbn(self, key, value):
+        """Validates that the ISBN has at least 10 digits (ignoring hyphens)."""
         if not value or len(value.replace('-', '')) < 10:
             raise ValueError("ISBN of book should have at least 10 digits")
         return value.strip()
 
     @validates('publication_year')
     def validate_publication_year(self, key, value):
-        if value == '' or value is None or len(value) < 4:
+        """
+        Validates and cleans the publication year.
+
+        Converts string input to integer and ensures the year is not in the
+        future.
+        """
+        if value == '' or value is None:
             return None
         try:
             int_value = int(value)
@@ -70,15 +102,18 @@ class Book(db.Model):
 
     @validates('author_id')
     def validate_author_id(self, key, value):
+        """Validates that an author is selected and converts the ID to an integer."""
         if value == '' or value is None:
             raise ValueError("Please select an author for the book")
         try:
-            return int(value)
+            int_value = int(value)
+            return int_value
         except ValueError:
             raise ValueError("Invalid author selected")
 
     @validates('cover_url')
     def validate_cover_url(self, key, value):
+        """Validates that the cover URL starts with valid web protocols."""
         if value and not ((value.startswith('http://') or value.startswith('https://'))):
             raise ValueError("URL of cover url should start with http:// or https://")
         return value.strip() if value else None
