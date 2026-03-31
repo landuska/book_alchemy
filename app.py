@@ -106,6 +106,9 @@ def add_book():
         input_isbn = request.form.get('isbn')
         input_publication_year = int(request.form.get('publication_year')) if request.form.get('publication_year') else None
         input_author_id_str = request.form.get('author_id')
+        input_rating_str = request.form.get('rating')
+
+        input_rating = int(input_rating_str) if input_rating_str else None
 
         book_does_exist = db.session.query(Book).filter_by(title=input_title).first()
         if book_does_exist:
@@ -123,7 +126,8 @@ def add_book():
                 title=input_title,
                 isbn=input_isbn,
                 publication_year=input_publication_year,
-                author_id=input_author_id
+                author_id=input_author_id,
+                rating=input_rating
             )
 
             new_book.cover_url = get_book_cover(input_isbn)
@@ -166,6 +170,7 @@ def sort():
 
     return render_template('sort.html', books=books)
 
+
 @app.route("/book/<int:book_id>/delete", methods=['POST'])
 def delete_book(book_id):
     """
@@ -199,14 +204,39 @@ def delete_book(book_id):
 
     return redirect(url_for('home'))
 
+
 @app.route("/book/<int:book_id>", methods=['GET'])
 def get_book_info(book_id):
+    """
+    Displays detailed information about a specific book.
+
+    Fetches the book and its associated author based on the book's ID.
+
+    Args:
+        book_id (int): The unique identifier of the book to retrieve.
+
+    Returns:
+        Rendered HTML template 'book_info.html' with the book and author objects.
+        If the book is not found, redirects to the homepage with a flash message.
+    """
     book = db.session.get(Book, book_id)
-    if book:
-        return render_template("book_info.html", book=book, author=book.author_id)
+    author = db.session.get(Author, book.author_id)
+    if not book:
+        flash("Error: Book not found")
+        return redirect(url_for('home'))
+
+    return render_template("book_info.html", book=book, author=author)
+
 
 @app.route("/authors", methods=['GET'])
 def show_authors():
+    """
+    Displays a list of all authors and the titles of books they have written.
+
+    Returns:
+        Rendered HTML template 'authors.html' containing a list of dictionaries,
+        where each dictionary has an 'author' object and a list of 'books' titles.
+    """
     all_data = db.session.query(Book, Author).join(Author, Book.author_id == Author.id).all()
     authors_dict = {}
 
@@ -217,13 +247,52 @@ def show_authors():
                 "books": []
             }
         authors_dict[author.id]["books"].append(book.title)
-        authors_books = list(authors_dict.values())
+    authors_books = list(authors_dict.values())
     return render_template("authors.html", authors=authors_books)
+
+
+@app.route("/book/<int:book_id>/rate", methods=['POST'])
+def rate_book(book_id):
+    """
+    Updates the rating of a specific book in the database.
+
+    Accepts form data containing the numerical 'rating'.
+    If valid, updates the database. If the model validation fails (e.g.,
+    rating out of range), catches the error and displays the message.
+
+    Args:
+        book_id (int): The unique identifier of the book to rate.
+
+    Returns:
+        Redirects back to the previous page (or homepage) with a flash message.
+    """
+    book = db.session.get(Book, book_id)
+    if not book:
+        flash("Error: Book not found")
+        return redirect(url_for('home'))
+
+    input_rating = request.form.get('rating')
+
+    if not input_rating:
+        flash("Error: Please enter a rating")
+        return redirect(url_for('home'))
+
+    try:
+        book.rating = int(input_rating)
+        db.session.commit()
+        flash(f"Rated '{book.title}' as {input_rating}/10")
+    except ValueError as e:
+        db.session.rollback()
+        flash(f"Error: {e}")
+
+    return redirect(url_for('home'))
+
 
 @app.errorhandler(404)
 def page_not_found(error):
     """Custom error handler for 404 (Page Not Found) errors."""
     return render_template("404.html"), 404
+
 
 @app.errorhandler(500)
 def server_error(error):

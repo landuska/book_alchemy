@@ -1,0 +1,102 @@
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --success-color: #2ecc71;
+  --danger-color: #e74c3c;
+  --bg-color: #f8f9fa;
+  --text-color: #333;
+  --border-radius: 8px;
+  --shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.main-wrapper {
+  max-width: 900px;
+  width: 100%;
+  background: white;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+h1, h2, h3 {
+  color: var(--secondary-color);
+}
+
+
+input[type="text"], input[type="number"], input[type="date"], select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+input[type="submit"], .btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+input[type="submit"]:hover, .btn:hover {
+  background-color: #2980b9;
+}
+
+
+.btn-danger {
+  background-color: var(--danger-color);
+}
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+
+.flash-message {
+  padding: 12px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+
+.book-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 15px;
+  transition: transform 0.2s;
+}
+
+.book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.book-card img {
+  width: 90px;
+  height: auto;
+  border-radius: 4px;
+  margin-right: 20px;
+}

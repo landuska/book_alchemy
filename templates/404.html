@@ -4,55 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-      <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+    <title>404 - Page Not Found</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-container {
             text-align: center;
-            padding: 50px;
+            padding: 40px 10px;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-size: 100px;
+        .error-code {
+            font-size: 120px;
+            font-weight: bold;
             margin: 0;
-            color: #e74c3c;
+            color: var(--danger-color);
+            line-height: 1;
         }
-        h2 {
-            margin-top: 0;
-            color: #2c3e50;
+        .error-title {
+            font-size: 28px;
+            color: var(--secondary-color);
+            margin: 10px 0 20px 0;
         }
-        p {
+        .error-message {
             font-size: 18px;
             color: #7f8c8d;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.2s;
+            margin-bottom: 30px;
         }
     </style>
   </head>
 <body>
-    <div class="container">
-        <h1>404</h1>
-        <h2>Sorry!</h2>
-        <p>This page is not found</p>
-        <a href="{{ url_for('home') }}" class="btn">Return to main page</a>
+    <div class="main-wrapper">
+        <div class="error-container">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">Whoops! Page Not Found</h2>
+            <p class="error-message">The page you are looking for doesn't exist or has been moved.</p>
+            <a href="{{ url_for('home') }}" class="btn">🔙 Return to Main Page</a>
+        </div>
     </div>
 </body>
 </html>

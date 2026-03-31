@@ -4,30 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-      {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for msg in messages %}
-              <p style="color: green;">{{ msg }}</p>
-            {% endfor %}
-          {% endif %}
-      {% endwith %}<br>
-      <form action="/add_book" method="POST">
-          <label for="title">Book title:</label>
-          <input type="text" id="title" name="title" required><br><br>
-          <label for="isbn">ISBN:</label>
-          <input type="text" id="isbn" name="isbn" required><br><br>
-          <label for="publication_year">Publication year:</label>
-          <input type="number" id="publication_year" name="publication_year"><br><br>
-          <label for="author">Select author:</label>
-          <select id="author" name="author_id">
-          <option value="">-- Select --</option>
-          {% for author in authors %}
-              <option value="{{ author.id }}"> {{author.name}} </option>
-          {% endfor %}
-          </select>
-          <input type="submit" value="Add book">
-      </form>
+      <div class="main-wrapper">
+          <a href="{{ url_for('home') }}" class="btn" style="background-color: #95a5a6; margin-bottom: 20px;">⬅ Back to list</a>
+
+          <h1>📖 Add New Book</h1>
+
+          {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for msg in messages %}
+                  <div class="flash-message">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+          {% endwith %}
+
+          <form action="/add_book" method="POST">
+              <label for="title"><strong>Book Title:</strong></label>
+              <input type="text" id="title" name="title" placeholder="e.g. Harry Potter" required>
+
+              <label for="isbn"><strong>ISBN:</strong></label>
+              <input type="text" id="isbn" name="isbn" placeholder="e.g. 9780747532699" required>
+
+              <label for="publication_year"><strong>Publication Year:</strong></label>
+              <input type="number" id="publication_year" name="publication_year" placeholder="e.g. 1997">
+
+              <label for="rating"><strong>Rating (1-10):</strong> (Optional)</label>
+              <input type="number" id="rating" name="rating" min="1" max="10" placeholder="e.g. 9">
+
+              <label for="author"><strong>Select Author:</strong></label>
+              <select id="author" name="author_id" required>
+                  <option value="">-- Select Author --</option>
+                  {% for author in authors %}
+                      <option value="{{ author.id }}"> {{ author.name }} </option>
+                  {% endfor %}
+              </select>
+
+              <input type="submit" value="Add book" style="width: 100%; margin-top: 10px;">
+          </form>
+      </div>
   </body>
 </html>

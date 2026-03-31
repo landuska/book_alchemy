@@ -1,52 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <style>
-        .book {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      .book img {
-        width: 100px;
-        height: auto;
-        margin-right: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>My Books</h1>
-    <form method="GET" action="/">
-      <label for="search">Search by title:</label>
-        <input type="text" id="search" name="search"><br><br>
-        <input type="submit" value="Search">
-    </form><br>
-    <form method="GET" action="/authors">
-        <input type="submit" value="Show all authors">
-    </form><br>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for msg in messages %}
-          <p style="color: green;">{{ msg }}</p>
+    <title>My Bookshelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <h1>📚 My Library</h1>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <form method="GET" action="/" style="flex: 2; display: flex; gap: 10px;">
+                <input type="text" id="search" name="search" placeholder="Search by title...">
+                <input type="submit" value="Search">
+            </form>
+            <a href="{{ url_for('show_authors') }}" class="btn">Authors</a>
+            <a href="{{ url_for('sort') }}" class="btn">Sort Books</a>
+            <a href="{{ url_for('add_book') }}" class="btn">+ Add Book</a>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="flash-message">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% for book, author in books %}
+        <div class="book-card">
+            <a href="{{ url_for('get_book_info', book_id=book.id) }}">
+                <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+            </a>
+            <div style="flex: 1;">
+                <h3 style="margin: 0 0 5px 0;">{{ book.title }}</h3>
+                <p style="margin: 0; color: #7f8c8d;">Written by <strong>{{ author.name }}</strong></p>
+
+                <p style="margin: 5px 0; font-size: 14px; color: #f39c12;">
+                    ⭐ {{ book.rating if book.rating else 'Not rated yet' }}/10
+                </p>
+
+                <form method="POST" action="{{ url_for('rate_book', book_id=book.id) }}" style="display: flex; gap: 5px; align-items: center; margin-top: 10px;">
+                    <input type="number" name="rating" min="1" max="10" placeholder="Rate 1-10" style="width: 100px; margin-bottom: 0; padding: 5px;">
+                    <input type="submit" value="Rate" style="padding: 5px 10px; font-size: 14px;">
+                </form>
+            </div>
+
+            <div>
+                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
+                    <input type="submit" value="Delete" class="btn btn-danger" style="padding: 5px 10px; font-size: 14px;">
+                </form>
+            </div>
+        </div>
         {% endfor %}
-      {% endif %}
-    {% endwith %}
-    {% for book, author in books %}<br>
-    <div class="book">
-        <a href="{{ url_for('get_book_info', book_id=book.id) }}">
-            <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
-        </a>
-          <div>
-            <p><strong>{{ book.title }}</strong></p>
-            <p>Written by <strong>{{ author.name }}</strong></p>
-            <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
-                <input type="submit" value="Delete">
-            </form><br><br>
-          </div>
     </div>
-    {% endfor %}
-  </body>
+</body>
 </html>

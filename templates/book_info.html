@@ -1,56 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Info</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-      .book-container {
-        display: flex;
-        align-items: flex-start;
-        margin: 20px;
-      }
-      .book-container img {
-        width: 150px;
-        margin-right: 30px;
-      }
-      .book-details {
-        max-width: 600px;
-      }
-      .back-link {
-        margin: 20px;
-        display: inline-block;
-      }
-    </style>
-  </head>
-  <body>
+    <title>{{ book.title }} - Info</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <a href="{{ url_for('home') }}" class="btn" style="background-color: #95a5a6; margin-bottom: 20px;">⬅ Back to list</a>
 
-    <a href="{{ url_for('home') }}" class="back-link">⬅ Back to list</a>
+        <div style="display: flex; gap: 30px; align-items: flex-start;">
+            <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" style="width: 200px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
 
-    <div class="book-container">
-      <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+            <div style="flex: 1;">
+                <h1 style="margin-top: 0;">{{ book.title }}</h1>
+                <p><strong>Author:</strong> {{ author.name if author else 'Unknown' }}</p>
+                <p><strong>Publication Year:</strong> {{ book.publication_year }}</p>
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p>
 
-      <div class="book-details">
-        <h1>{{ book.title }}</h1>
-        <p><strong>Author:</strong> {{ author.name }}</p>
-        <p><strong>Publication Year:</strong> {{ book.publication_year }}</p>
-        <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                {% if book.rating %}
+                <p style="color: #f39c12;"><strong>Rating:</strong> ⭐ {{ book.rating }}/10</p>
+                {% endif %}
 
-        {% if book.description %}
-          <p><strong>Description:</strong></p>
-          <p>{{ book.description }}</p>
-        {% endif %}
+                {% if book.description %}
+                  <p><strong>Description:</strong></p>
+                  <p style="color: #555; line-height: 1.6;">{{ book.description }}</p>
+                {% endif %}
 
-        <br>
-
-        <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
-          <input type="submit" value="Delete Book">
-        </form>
-      </div>
+                <br>
+                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}">
+                    <input type="submit" value="Delete Book" class="btn btn-danger">
+                </form>
+            </div>
+        </div>
     </div>
-
-  </body>
+</body>
 </html>

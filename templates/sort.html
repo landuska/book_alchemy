@@ -4,38 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <style>
-        .book {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      .book img {
-        width: 100px;
-        height: auto;
-        margin-right: 20px;
-      }
-    </style>
+    <title>Sort Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <h1>My Books</h1>
-    <form method="GET" action="/sort">
-      <label for="sort">Sort by:</label>
-      <select name="sort" id="sort">
-        <option value="">-- Select --</option>
-        <option value="publication_year">Publication Year</option>
-        <option value="author">Author</option>
-      </select>
-      <input type="submit" value="Submit">
-    </form><br><br>
-    {% for book, author in books %}
-    <div class="book">
-      <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
-      <div>
-        <p><strong>{{ book.title }}</strong></p>
-        <p>Written by <strong>{{ book.name }}</strong></p>
-      </div>
+    <div class="main-wrapper">
+        <a href="{{ url_for('home') }}" class="btn" style="background-color: #95a5a6; margin-bottom: 20px;">⬅ Back to list</a>
+
+        <h1>My Books</h1>
+
+        <form method="GET" action="/sort" style="display: flex; gap: 10px; align-items: center; margin-bottom: 30px;">
+          <label for="sort" style="white-space: nowrap;"><strong>Sort by:</strong></label>
+          <select name="sort" id="sort" style="margin-bottom: 0;">
+            <option value="">-- Select --</option>
+            <option value="publication_year">Publication Year</option>
+            <option value="author">Author</option>
+          </select>
+          <input type="submit" value="Apply" style="margin-bottom: 0;">
+        </form>
+
+        {% for book, author in books %}
+        <div class="book-card">
+            <a href="{{ url_for('get_book_info', book_id=book.id) }}">
+              <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+            </a>
+              <div>
+                <h3 style="margin: 0 0 5px 0;">{{ book.title }}</h3>
+                <p style="margin: 0; color: #7f8c8d;">Written by <strong>{{ author.name }}</strong></p>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #95a5a6;">Year: {{ book.publication_year }}</p>
+              </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
   </body>
 </html>

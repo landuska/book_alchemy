@@ -4,23 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add Author</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-      {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for msg in messages %}
-              <p style="color: green;">{{ msg }}</p>
-            {% endfor %}
-          {% endif %}
-      {% endwith %}<br>
-      <form action="/add_author" method="POST">
-          <label for="name">Author Name:</label>
-          <input type="text" id="name" name="name" required><br><br>
-          <label for="birthdate">Birthdate:</label>
-          <input type="date" id="birthdate" name="birthdate"><br><br>
-          <label for="date_of_death">Date of Death:</label>
-          <input type="date" id="date_of_death" name="date_of_death"><br><br>
-          <input type="submit" value="Add author">
-      </form>
+      <div class="main-wrapper">
+          <a href="{{ url_for('home') }}" class="btn" style="background-color: #95a5a6; margin-bottom: 20px;">⬅ Back to list</a>
+
+          <h1>✍️ Add New Author</h1>
+
+          {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for msg in messages %}
+                  <div class="flash-message">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+          {% endwith %}
+
+          <form action="/add_author" method="POST">
+              <label for="name"><strong>Author Name:</strong></label>
+              <input type="text" id="name" name="name" placeholder="e.g. J.K. Rowling" required>
+
+              <label for="birthdate"><strong>Birthdate:</strong></label>
+              <input type="date" id="birthdate" name="birthdate">
+
+              <label for="date_of_death"><strong>Date of Death:</strong> (Optional)</label>
+              <input type="date" id="date_of_death" name="date_of_death">
+
+              <input type="submit" value="Add author" style="width: 100%; margin-top: 10px;">
+          </form>
+      </div>
   </body>
 </html>

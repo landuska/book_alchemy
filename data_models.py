@@ -66,6 +66,7 @@ class Book(db.Model):
     publication_year: Mapped[int] = mapped_column(Integer)
     author_id: Mapped[int] = mapped_column(Integer, ForeignKey('authors.id'))
     cover_url: Mapped[str] = mapped_column(String, nullable=True)
+    rating: Mapped[int] = mapped_column(Integer, nullable=True)
 
     @validates('title')
     def validate_title(self, key, value):
@@ -117,6 +118,21 @@ class Book(db.Model):
         if value and not ((value.startswith('http://') or value.startswith('https://'))):
             raise ValueError("URL of cover url should start with http:// or https://")
         return value.strip() if value else None
+
+    @validates('rating')
+    def validate_rating(self, key, value):
+        """Validates that the rating is not more than 10."""
+        if value == '' or value is None:
+            return None
+        try:
+            int_value = int(value)
+        except ValueError:
+            raise ValueError("Invalid rating")
+
+        if not (1 <= int_value <= 10):
+            raise ValueError("Rating of book should be from 1 to 10")
+        return int_value
+
 
     def __repr__(self):
         return f"Book (id={self.id}, isbn={self.isbn}, title={self.title}, publication_year={self.publication_year}, author_id={self.author_id})"
