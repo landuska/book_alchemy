@@ -58,7 +58,7 @@ def add_author():
             birth_date = datetime.strptime(input_birth_date_str, '%Y-%m-%d').date() if input_birth_date_str else None
             date_of_death = datetime.strptime(input_date_of_death_str, '%Y-%m-%d').date() if input_date_of_death_str else None
         except ValueError:
-            flash("error: Invalid date format")
+            flash("error: date format should be DD-MM-YYYY")
             return redirect(url_for("add_author"))
 
         name_does_exist = db.session.query(Author).filter_by(name=input_name).first()
@@ -79,6 +79,11 @@ def add_author():
         except ValueError as e:
             db.session.rollback()
             flash(f"error: {e}")
+            return redirect(url_for("add_author"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Database error: {e}")
             return redirect(url_for("add_author"))
 
         return redirect(url_for("add_author"))
@@ -104,21 +109,20 @@ def add_book():
     if request.method == 'POST':
         input_title = request.form.get('title')
         input_isbn = request.form.get('isbn')
-        input_publication_year = int(request.form.get('publication_year')) if request.form.get('publication_year') else None
-        input_author_id_str = request.form.get('author_id')
-        input_rating_str = request.form.get('rating')
+        input_publication_year = request.form.get('publication_year')
+        input_author_id = request.form.get('author_id')
+        input_rating = request.form.get('rating')
 
-        input_rating = int(input_rating_str) if input_rating_str else None
+        isbn = input_isbn.replace('-', '').strip()
 
-        book_does_exist = db.session.query(Book).filter_by(title=input_title).first()
-        if book_does_exist:
-            flash(f"Book {input_title} already exists in DB")
+        if len(isbn) < 10 or not isbn.isdigit():
+            flash("ISBN of book should have at least 10 digits")
             return redirect(url_for("add_book"))
 
-        try:
-            input_author_id = int(input_author_id_str)
-        except ValueError:
-            flash("error: Please select an author")
+        book_does_exist = db.session.query(Book).filter_by(isbn=isbn).first()
+
+        if book_does_exist:
+            flash(f"Book {input_title} already exists in DB")
             return redirect(url_for("add_book"))
 
         try:
@@ -130,7 +134,10 @@ def add_book():
                 rating=input_rating
             )
 
-            new_book.cover_url = get_book_cover(input_isbn)
+            try:
+                new_book.cover_url = get_book_cover(input_isbn)
+            except Exception:
+                flash("Could not fetch book cover from API.")
 
             db.session.add(new_book)
             db.session.commit()
@@ -138,6 +145,11 @@ def add_book():
         except ValueError as e:
             db.session.rollback()
             flash(f"error: {e}")
+            return redirect(url_for("add_book"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Database error: {e}")
             return redirect(url_for("add_book"))
 
         return redirect(url_for("add_book"))
@@ -199,8 +211,17 @@ def delete_book(book_id):
             if author:
                 db.session.delete(author)
                 flash(f"Author {author.name} deleted successfully")
+    try:
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        flash(f"error: {e}")
+        return redirect(url_for("delete_book"))
 
-    db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Database error: {e}")
+        return redirect(url_for("delete_book"))
 
     return redirect(url_for('home'))
 
@@ -220,11 +241,12 @@ def get_book_info(book_id):
         If the book is not found, redirects to the homepage with a flash message.
     """
     book = db.session.get(Book, book_id)
-    author = db.session.get(Author, book.author_id)
+
     if not book:
         flash("Error: Book not found")
         return redirect(url_for('home'))
 
+    author = db.session.get(Author, book.author_id)
     return render_template("book_info.html", book=book, author=author)
 
 
@@ -268,13 +290,13 @@ def rate_book(book_id):
     """
     book = db.session.get(Book, book_id)
     if not book:
-        flash("Error: Book not found")
+        flash("error: Book not found")
         return redirect(url_for('home'))
 
     input_rating = request.form.get('rating')
 
     if not input_rating:
-        flash("Error: Please enter a rating")
+        flash("error: Please enter a rating")
         return redirect(url_for('home'))
 
     try:
@@ -283,7 +305,12 @@ def rate_book(book_id):
         flash(f"Rated '{book.title}' as {input_rating}/10")
     except ValueError as e:
         db.session.rollback()
-        flash(f"Error: {e}")
+        flash(f"error: {e}")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Database error: {e}")
+        return redirect(url_for("delete_book"))
 
     return redirect(url_for('home'))
 

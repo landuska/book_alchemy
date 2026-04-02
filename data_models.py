@@ -26,14 +26,19 @@ class Author(db.Model):
     def validate_name(self, key, value):
         """Validates that the author's name is not empty."""
         if not value:
-            raise ValueError("Name cannot be empty")
+            raise ValueError("Author's name cannot be empty")
         return value.strip()
 
     @validates('birth_date', 'date_of_death')
     def validate_dates(self, key, value):
-        """Validates that birth and death dates are not set in the future."""
+        """Validates that birth and death dates are not set in the future, and death date is not before birth date."""
         if value and value > date.today():
-            raise ValueError("Birthdate or deathdate cannot be in the future")
+            raise ValueError("Birth date or death date cannot be in the future")
+
+        if key == 'date_of_death' and value and self.birth_date:
+            if value < self.birth_date:
+                raise ValueError("Death date cannot be before birth date")
+
         return value
 
     def __repr__(self):
@@ -52,17 +57,18 @@ class Book(db.Model):
 
     Attributes:
         id (int): Primary key, auto-incremented.
-        isbn (str): The ISBN of the book. Must have at least 10 digits.
+        isbn (str): The ISBN of the book. Must have at least 10 digits, cannot be empty.
         title (str): The unique title of the book. Cannot be empty.
         publication_year (int): The year the book was published. Cannot be in
-          the future.
+          the future and empty.
         author_id (int): Foreign key referencing the author of the book.
         cover_url (str, optional): URL to the book's cover image.
+        rating(int, optional): The rating of the book.
     """
     __tablename__ = 'books'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    isbn: Mapped[str] = mapped_column(String)
     title: Mapped[str] = mapped_column(String, unique=True)
+    isbn: Mapped[str] = mapped_column(String)
     publication_year: Mapped[int] = mapped_column(Integer)
     author_id: Mapped[int] = mapped_column(Integer, ForeignKey('authors.id'))
     cover_url: Mapped[str] = mapped_column(String, nullable=True)
@@ -77,10 +83,10 @@ class Book(db.Model):
 
     @validates('isbn')
     def validate_isbn(self, key, value):
-        """Validates that the ISBN has at least 10 digits (ignoring hyphens)."""
-        if not value or len(value.replace('-', '')) < 10:
-            raise ValueError("ISBN of book should have at least 10 digits")
-        return value.strip()
+        """Validates that the book's isbn is not empty."""
+        if not value:
+            raise ValueError("ISBN of book cannot be empty")
+        return value
 
     @validates('publication_year')
     def validate_publication_year(self, key, value):
@@ -90,8 +96,8 @@ class Book(db.Model):
         Converts string input to integer and ensures the year is not in the
         future.
         """
-        if value == '' or value is None:
-            return None
+        if value == '' or value is None or len(value) != 4:
+            raise ValueError("Publication year should be in the format YYYY")
         try:
             int_value = int(value)
         except ValueError:
